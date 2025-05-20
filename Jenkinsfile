@@ -1,70 +1,81 @@
 pipeline {
     agent any
     
-    tools{
-        jdk 'jdk17'
+    tools {
         nodejs 'node16'
-        
     }
     
-    environment{
-        SCANNER_HOME= tool 'sonar-scanner'
+    environment {
+        SCANNER_HOME = tool 'sonar-scanner'
     }
-    
+
     stages {
         stage('Git Checkout') {
             steps {
-                git branch: 'main', url: 'https://github.com/jaiswaladi246/fullstack-bank.git'
+                git branch: 'main', url: 'https://github.com/aymaneberka/fullstack-bank.git'
             }
         }
         
+        stage('Convert EOL to LF') {
+            steps {
+                 bat '''
+                    git config core.autocrlf false
+                    git config core.eol lf
+                    git add --renormalize .
+                    '''
+                }
+        }
+
         stage('OWASP FS SCAN') {
             steps {
-                dependencyCheck additionalArguments: '--scan ./app/backend --disableYarnAudit --disableNodeAudit', odcInstallation: 'DC'
-                    dependencyCheckPublisher pattern: '**/dependency-check-report.xml'
+                dependencyCheck additionalArguments: '--scan ./ --disableYarnAudit --nodeAuditSkipDevDependencies', odcInstallation: 'dc'
+                dependencyCheckPublisher pattern: '**/dependency-check-report.xml'
             }
         }
-        
+
         stage('TRIVY FS SCAN') {
             steps {
-                sh "trivy fs ."
+                bat 'C:\\Users\\HP\\trivy.exe fs ./'
             }
         }
-        
+
         stage('SONARQUBE ANALYSIS') {
             steps {
                 withSonarQubeEnv('sonar') {
-                    sh " $SCANNER_HOME/bin/sonar-scanner -Dsonar.projectName=Bank -Dsonar.projectKey=Bank "
+                    bat "\"%SCANNER_HOME%\\bin\\sonar-scanner\" -Dsonar.projectKey=Bank -Dsonar.projectName=Bank"
                 }
             }
         }
-        
-        
-         stage('Install Dependencies') {
+
+        stage('Install dependencies (racine)') {
             steps {
-                sh "npm install"
+                bat "npm install"
             }
         }
-        
+
         stage('Backend') {
             steps {
-                dir('/root/.jenkins/workspace/Bank/app/backend') {
-                    sh "npm install"
+                dir('app/backend') {
+                    bat "npm install"
                 }
             }
         }
-        
-        stage('frontend') {
+
+        stage('Frontend') {
             steps {
-                dir('/root/.jenkins/workspace/Bank/app/frontend') {
-                    sh "npm install"
+                dir('app/frontend') {
+                    bat "npm install"
                 }
             }
         }
-        
-        stage('Deploy to Conatiner') {
+        stage('Deploy to Container') {
             steps {
-                sh "npm run compose:up -d"
+                bat '''
+                cd app
+                docker-compose down
+                docker-compose build --no-cache
+                docker-compose up -d
+                '''
             }
         }
     }
