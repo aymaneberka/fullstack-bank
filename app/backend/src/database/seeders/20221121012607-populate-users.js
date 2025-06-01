@@ -2,27 +2,36 @@
 
 module.exports = {
   up: async (queryInterface, Sequelize) => {
-    await queryInterface.bulkInsert(
-      'Users',
-      [
-        {
-          username: 'raphaelmartins',
-          password:
-            '$2a$10$fSZZa/tIodeeOJ.JGn6IbuP9QZ44gaN0b1.XCAis/VgNDM.XXlTmC',
-          accountId: 1,
+    // Importer le modèle User
+    const { User } = require('../models'); // Ajuste le chemin si nécessaire
+
+    const users = [
+      {
+        username: 'raphaelmartins',
+        password: '$2a$10$fSZZa/tIodeeOJ.JGn6IbuP9QZ44gaN0b1.XCAis/VgNDM.XXlTmC',
+        accountId: 1,
+      },
+      {
+        username: 'daniloputinato',
+        password: '$2a$10$fSZZa/tIodeeOJ.JGn6IbuP9QZ44gaN0b1.XCAis/VgNDM.XXlTmC',
+        accountId: 2,
+      },
+    ];
+
+    for (const userData of users) {
+      await User.findOrCreate({
+        where: { username: userData.username },
+        defaults: {
+          password: userData.password,
+          accountId: userData.accountId,
         },
-        {
-          username: 'daniloputinato',
-          password:
-            '$2a$10$fSZZa/tIodeeOJ.JGn6IbuP9QZ44gaN0b1.XCAis/VgNDM.XXlTmC',
-          accountId: 2,
-        },
-      ],
-      {}
-    );
+      });
+    }
   },
 
   down: async (queryInterface, Sequelize) => {
-    await queryInterface.bulkDelete('Users', null, {});
+    await queryInterface.bulkDelete('Users', {
+      username: ['raphaelmartins', 'daniloputinato'],
+    });
   },
 };
