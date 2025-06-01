@@ -15,17 +15,13 @@
     "emitDecoratorMetadata": true,
     "strictPropertyInitialization": false,
     "skipLibCheck": true,
-    "types": ["node"],
+    "types": ["node", "mocha"],   
     "paths": {
       "*": ["node_modules/*"]
     }
   },
-  "include": ["src/**/*"],
+  "include": ["src/**/*"],          
   "exclude": [
-    "node_modules",
-    "src/tests",
-    "**/*.test.ts",
-    "**/*.test.tsx",
-    "**/__tests__/**"
+    "node_modules"                  
   ]
 }
