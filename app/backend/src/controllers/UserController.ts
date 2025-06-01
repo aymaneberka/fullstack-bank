@@ -14,10 +14,14 @@ class UserController {
   }
 
   async login(req: Request, res: Response): Promise<void> {
+  try {
     const userData = await this._service.login(req.body);
-
     res.status(StatusCodes.OK).json(userData);
+  } catch (error) {
+    console.error('Erreur login:', error);  // <-- ajoute ce log pour capturer l'erreur
+    res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ error: 'Internal server error' });
   }
+}
 
   async register(req: Request, res: Response): Promise<void> {
     await this._service.register(req.body);
