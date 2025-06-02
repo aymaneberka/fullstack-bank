@@ -3,7 +3,8 @@
 module.exports = {
   up: async (queryInterface, Sequelize) => {
     // Importer le modèle User
-    const User = require('../models/User');
+    const User = require('../models/User').default;
+
 
 
     const users = [
