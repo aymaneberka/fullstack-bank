@@ -3,7 +3,7 @@ import { StatusCodes } from "http-status-codes";
 import UserService from '../services/UserService';
 import UnauthorizedError from '../utils/errors/UnauthorizedError';
 import UnprocessableEntityError from '../utils/errors/UnprocessableEntityError';
-import ValidationError from '../utils/errors/ValidationError'; // Ajoute-le si tu as une classe validation
+import ValidationError from '../utils/errors/ValidationError';
 
 class UserController {
   private _service: UserService;
@@ -23,19 +23,19 @@ class UserController {
     } catch (error: any) {
       console.error('Erreur login:', error);
 
-      // Gestion des erreurs spécifiques :
       if (
         error instanceof UnprocessableEntityError ||
         error instanceof ValidationError
       ) {
-        return res.status(StatusCodes.BAD_REQUEST).json({ message: error.message });
+        res.status(StatusCodes.BAD_REQUEST).json({ message: error.message });
+        return;
       }
 
       if (error instanceof UnauthorizedError) {
-        return res.status(StatusCodes.UNAUTHORIZED).json({ message: error.message });
+        res.status(StatusCodes.UNAUTHORIZED).json({ message: error.message });
+        return;
       }
 
-      // Erreur générique sinon
       res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ error: 'Internal server error' });
     }
   }
@@ -47,16 +47,17 @@ class UserController {
     } catch (error: any) {
       console.error('Erreur register:', error);
 
-      // Erreur de validation pour register aussi
       if (
         error instanceof UnprocessableEntityError ||
         error instanceof ValidationError
       ) {
-        return res.status(StatusCodes.BAD_REQUEST).json({ message: error.message });
+        res.status(StatusCodes.BAD_REQUEST).json({ message: error.message });
+        return;
       }
 
       if (error instanceof UnauthorizedError) {
-        return res.status(StatusCodes.UNAUTHORIZED).json({ message: error.message });
+        res.status(StatusCodes.UNAUTHORIZED).json({ message: error.message });
+        return;
       }
 
       res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ error: 'Internal server error' });
