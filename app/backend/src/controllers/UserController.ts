@@ -19,7 +19,7 @@ class UserController {
   async login(req: Request, res: Response): Promise<void> {
     try {
       const userData = await this._service.login(req.body);
-      res.status(StatusCodes.OK).json(userData);
+      return res.status(StatusCodes.OK).json(userData);
     } catch (error: any) {
       console.error('Erreur login:', error);
 
@@ -27,23 +27,21 @@ class UserController {
         error instanceof UnprocessableEntityError ||
         error instanceof ValidationError
       ) {
-        res.status(StatusCodes.BAD_REQUEST).json({ message: error.message });
-        return;
+        return res.status(StatusCodes.BAD_REQUEST).json({ message: error.message });
       }
 
       if (error instanceof UnauthorizedError) {
-        res.status(StatusCodes.UNAUTHORIZED).json({ message: error.message });
-        return;
+        return res.status(StatusCodes.UNAUTHORIZED).json({ message: error.message });
       }
 
-      res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ error: 'Internal server error' });
+      return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ error: 'Internal server error' });
     }
   }
 
   async register(req: Request, res: Response): Promise<void> {
     try {
       await this._service.register(req.body);
-      res.status(StatusCodes.CREATED).json({ message: 'Usuário registrado com sucesso.' });
+      return res.status(StatusCodes.CREATED).json({ message: 'Usuário registrado com sucesso.' });
     } catch (error: any) {
       console.error('Erreur register:', error);
 
@@ -51,26 +49,24 @@ class UserController {
         error instanceof UnprocessableEntityError ||
         error instanceof ValidationError
       ) {
-        res.status(StatusCodes.BAD_REQUEST).json({ message: error.message });
-        return;
+        return res.status(StatusCodes.BAD_REQUEST).json({ message: error.message });
       }
 
       if (error instanceof UnauthorizedError) {
-        res.status(StatusCodes.UNAUTHORIZED).json({ message: error.message });
-        return;
+        return res.status(StatusCodes.UNAUTHORIZED).json({ message: error.message });
       }
 
-      res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ error: 'Internal server error' });
+      return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ error: 'Internal server error' });
     }
   }
 
   async getBalance(req: Request, res: Response): Promise<void> {
     try {
       const balance = await this._service.getBalance(req.headers.authorization);
-      res.status(StatusCodes.OK).json({ balance });
+      return res.status(StatusCodes.OK).json({ balance });
     } catch (error: any) {
       console.error('Erreur getBalance:', error);
-      res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ error: 'Internal server error' });
+      return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ error: 'Internal server error' });
     }
   }
 }
