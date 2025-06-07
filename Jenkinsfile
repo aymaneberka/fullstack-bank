@@ -147,5 +147,4 @@ pipeline {
             cleanWs()
         }
     }
-}fait les changement necessaire 
-pour fixer probleme de la base de donnes
+}
