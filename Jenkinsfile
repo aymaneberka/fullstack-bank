@@ -78,5 +78,20 @@ pipeline {
                 '''
             }
         }
+
+        stage('Run DB Migrations') {
+            steps {
+                dir('app/backend') {
+                    bat "npx sequelize-cli db:migrate"
+                    bat "npx sequelize-cli db:seed:all"
+                }
+            }
+        }
+    }
+
+    post {
+        always {
+            cleanWs()
+        }
     }
 }
