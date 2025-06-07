@@ -4,7 +4,7 @@ import Account from '../database/models/Account';
 import User, { IUserLogin, IUserRegister } from '../database/models/User';
 import NotFoundError from '../utils/errors/NotFoundError';
 import UnauthorizedError from '../utils/errors/UnauthorizedError';
-import UnprocessableEntityError from '../utils/errors/UnprocessableEntityError ';
+import UnprocessableEntityError from '../utils/errors/UnprocessableEntityError';
 import Token from './strategies/token/Token';
 import UserValidator from './strategies/validators/UserValidator';
 
