@@ -18,12 +18,12 @@ pipeline {
         
         stage('Convert EOL to LF') {
             steps {
-                 bat '''
+                bat '''
                     git config core.autocrlf false
                     git config core.eol lf
                     git add --renormalize .
-                    '''
-                }
+                '''
+            }
         }
 
         stage('OWASP FS SCAN') {
@@ -47,13 +47,7 @@ pipeline {
             }
         }
 
-        stage('Install dependencies (racine)') {
-            steps {
-                bat "npm install"
-            }
-        }
-
-        stage('Backend') {
+        stage('Install Backend Dependencies') {
             steps {
                 dir('app/backend') {
                     bat "npm install"
@@ -61,29 +55,88 @@ pipeline {
             }
         }
 
-        stage('Frontend') {
+        stage('Install Frontend Dependencies') {
             steps {
                 dir('app/frontend') {
                     bat "npm install"
                 }
             }
         }
-        stage('Deploy to Container') {
+
+        stage('Start Database Container') {
             steps {
-                bat '''
-                cd app
-                docker-compose down
-                docker-compose build --no-cache
-                docker-compose up -d
+                dir('app') {
+                    bat "docker-compose up -d db"
+                }
+            }
+        }
+
+        stage('Wait for Database Ready') {
+            steps {
+                powershell '''
+                    $port = 3002
+                    $maxRetries = 30
+                    $count = 0
+                    while ($count -lt $maxRetries) {
+                        try {
+                            $tcp = New-Object System.Net.Sockets.TcpClient('localhost', $port)
+                            if ($tcp.Connected) {
+                                Write-Host "PostgreSQL is ready on port $port!"
+                                $tcp.Close()
+                                exit 0
+                            }
+                        } catch {
+                            Write-Host "Port $port not ready yet, retrying..."
+                        }
+                        Start-Sleep -Seconds 2
+                        $count++
+                    }
+                    throw "Timeout: PostgreSQL not ready after 60 seconds."
                 '''
             }
         }
 
-        stage('Run DB Migrations') {
+        stage('Compile Backend (TypeScript)') {
+            steps {
+                dir('app/backend') {
+                    bat "npx tsc"
+                }
+            }
+        }
+
+        stage('Database Migrate & Seed') {
             steps {
                 dir('app/backend') {
                     bat "npx sequelize-cli db:migrate"
                     bat "npx sequelize-cli db:seed:all"
+                }
+            }
+        }
+
+        stage('Run Backend Tests') {
+            steps {
+                dir('app/backend') {
+                    bat "npm run test"
+                }
+            }
+        }
+
+        stage('Run Frontend Tests') {
+            steps {
+                dir('app/frontend') {
+                    bat "npm run test"
+                }
+            }
+        }
+
+        stage('Deploy Application Containers') {
+            steps {
+                dir('app') {
+                    bat '''
+                    docker-compose down
+                    docker-compose build --no-cache
+                    docker-compose up -d
+                    '''
                 }
             }
         }
@@ -94,4 +147,5 @@ pipeline {
             cleanWs()
         }
     }
-}
+}fait les changement necessaire 
+pour fixer probleme de la base de donnes
