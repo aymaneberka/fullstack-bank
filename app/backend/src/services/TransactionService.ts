@@ -7,7 +7,7 @@ import Transaction, {
 } from '../database/models/Transactions';
 import User from '../database/models/User';
 import NotFoundError from '../utils/errors/NotFoundError';
-import UnprocessableEntityError from '../utils/errors/UnprocessableEntityError ';
+import UnprocessableEntityError from '../utils/errors/UnprocessableEntityError';
 import Token from './strategies/token/Token';
 import TransactionValidator from './strategies/validators/TransactionValidator';
 
