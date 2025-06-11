@@ -1,5 +1,6 @@
 import express from 'express';
 import swaggerUI from 'swagger-ui-express';
+import { Registry, collectDefaultMetrics } from 'prom-client';
 import transactionsRouter from './routes/transactions';
 import usersRouter from './routes/users';
 import swaggerSettingsBr from './swagger-br.json';
@@ -7,11 +8,19 @@ import errorMiddleware from './utils/middleware/errorMiddleware';
 
 class App {
   public app: express.Express;
+  private registry: Registry;
 
   constructor() {
     this.app = express();
+    this.registry = new Registry();
+    collectDefaultMetrics({ register: this.registry });
 
     this.config();
+
+    this.app.get('/metrics', async (_req, res) => {
+      res.set('Content-Type', this.registry.contentType);
+      res.end(await this.registry.metrics());
+    });
 
     this.app.get('/', (req, res) => res.json({ ok: true }));
   }
